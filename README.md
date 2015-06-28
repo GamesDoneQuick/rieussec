@@ -4,7 +4,7 @@ A Node.js lib for making stopwatch timers.
 Rieussec does not have "split" functionality at this time.
 
 ## API Reference
-    <a name="Rieussec"></a>
+<a name="Rieussec"></a>
 ## Rieussec
 A rieussec stopwatch object.
 
@@ -56,3 +56,4 @@ Pause the timer.
 Manually set the timer (in milliseconds).
 
 **Kind**: static method of <code>[Rieussec](#Rieussec)</code>  
+
