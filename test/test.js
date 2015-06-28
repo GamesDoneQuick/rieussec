@@ -11,6 +11,20 @@ describe('Rieussec', function () {
             this.rieussec.stop();
         });
 
+        it('should not tick', function (done) {
+            var self = this;
+            this.rieussec.on('tick', onTick);
+
+            setTimeout(function() {
+                self.rieussec.removeListener('tick', onTick);
+                done();
+            }, self.rieussec.tickRate * 2);
+
+            function onTick() {
+                throw new Error('Rieussec should not tick when stopped');
+            }
+        });
+
         describe('#start()', function () {
             it('should set the interval', function () {
                 this.rieussec.start();
@@ -24,7 +38,7 @@ describe('Rieussec', function () {
 
             it('should set the start stamp to the current time', function (done) {
                 var preStartStamp = this.rieussec._startStamp;
-                setTimeout(function() {
+                setTimeout(function () {
                     this.rieussec.start();
                     this.rieussec._startStamp.should.not.equal(preStartStamp);
                     done();
@@ -67,6 +81,22 @@ describe('Rieussec', function () {
             this.rieussec.stop();
         });
 
+        it('should tick', function (done) {
+            var self = this;
+            var ticksHeard = 0;
+            this.rieussec.on('tick', onTick);
+            this.rieussec.start();
+
+            function onTick() {
+                ticksHeard++;
+                if (ticksHeard >= 2) {
+                    self.rieussec.removeListener('tick', onTick);
+                    self.rieussec.stop();
+                    done();
+                }
+            }
+        });
+
         describe('#start()', function () {
             it('should return "false"', function () {
                 this.rieussec.start().should.be.false;
@@ -85,7 +115,9 @@ describe('Rieussec', function () {
             });
 
             it('should emit a tick', function (done) {
-                this.rieussec.once('tick', function() { done(); });
+                this.rieussec.once('tick', function () {
+                    done();
+                });
                 this.rieussec.stop();
             });
 
@@ -103,7 +135,9 @@ describe('Rieussec', function () {
             });
 
             it('should emit a tick', function (done) {
-                this.rieussec.once('tick', function() { done(); });
+                this.rieussec.once('tick', function () {
+                    done();
+                });
                 this.rieussec.pause();
             });
 
@@ -132,7 +166,7 @@ describe('Rieussec', function () {
             var self = this;
             this.rieussec = new Rieussec();
             this.rieussec.start();
-            setTimeout(function() {
+            setTimeout(function () {
                 self.rieussec.pause();
                 done();
             }, 10)
@@ -140,6 +174,20 @@ describe('Rieussec', function () {
 
         afterEach(function () {
             this.rieussec.stop();
+        });
+
+        it('should not tick', function (done) {
+            var self = this;
+            this.rieussec.on('tick', onTick);
+
+            setTimeout(function() {
+                self.rieussec.removeListener('tick', onTick);
+                done();
+            }, self.rieussec.tickRate * 2);
+
+            function onTick() {
+                throw new Error('Rieussec should not tick when stopped');
+            }
         });
 
         describe('#start()', function () {
@@ -155,7 +203,7 @@ describe('Rieussec', function () {
 
             it('should not change the start stamp', function (done) {
                 var preStartStamp = this.rieussec._startStamp;
-                setTimeout(function() {
+                setTimeout(function () {
                     this.rieussec.start();
                     this.rieussec._startStamp.should.equal(preStartStamp);
                     done();
