@@ -1,6 +1,8 @@
 # Rieussec
 A Node.js lib for making stopwatch timers.
 
+[![Build Status](https://travis-ci.org/GamesDoneQuick/rieussec.svg?branch=master)](https://travis-ci.org/GamesDoneQuick/rieussec)
+
 Rieussec does not have "split" functionality at this time.
 
 ## API Reference
