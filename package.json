@@ -8,7 +8,6 @@
     "build": "npm run build:docs",
     "build:docs": "jsdoc2md \"index.js\" --template src/readme.hbs > README.md"
   },
-  ,
   "pre-commit": [
     "build",
     "test"
