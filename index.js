@@ -27,7 +27,7 @@ var Rieussec = function(options){
     // Initialize private properties
     this._milliseconds = 0;
     this._startStamp = Date.now();
-    this._stopStamp = Date.now();
+    this._pauseStamp = Date.now();
     this._state = 'stopped';
 };
 
@@ -52,29 +52,13 @@ Rieussec.prototype.start = function() {
 };
 
 /**
- * Stop the timer.
- * @memberof Rieussec
- * @method stop
- */
-Rieussec.prototype.stop = function() {
-    if (this._state === 'running') {
-        this._tick();
-        this._stopInterval();
-        this._state = 'stopped';
-        this._stopStamp = Date.now();
-        return true;
-    } else {
-        return false;
-    }
-};
-
-/**
  * Pause the timer.
  * @memberof Rieussec
  * @method pause
  */
 Rieussec.prototype.pause = function() {
     if (this._state === 'running') {
+        this._pauseStamp = Date.now();
         this._tick();
         this._stopInterval();
         this._state = 'paused';
@@ -82,6 +66,18 @@ Rieussec.prototype.pause = function() {
     } else {
         return false;
     }
+};
+
+/**
+ * Reset the timer.
+ * @memberof Rieussec
+ * @method reset
+ */
+Rieussec.prototype.reset = function() {
+    this._stopInterval();
+    this._milliseconds = 0;
+    this._tick(0);
+    this._state = 'stopped';
 };
 
 /**
@@ -96,16 +92,17 @@ Rieussec.prototype.setMilliseconds = function(ms) {
     if (this._state === 'running') {
         this._startStamp = Date.now() - this._milliseconds;
     } else {
-        this._startStamp = this._stopStamp - this._milliseconds;
+        this._startStamp = this._pauseStamp - this._milliseconds;
     }
 
     return this._milliseconds;
 };
 
-Rieussec.prototype._tick = function() {
-    if (this._state === 'running') {
-        this._currentStamp = Date.now();
-        this._milliseconds = this._currentStamp - this._startStamp;
+Rieussec.prototype._tick = function(ms) {
+    if (ms) {
+        this.emit('tick', ms);
+    } else if (this._state === 'running') {
+        this._milliseconds = Date.now() - this._startStamp;
         this.emit('tick', this._milliseconds);
         return true;
     } else {
@@ -118,7 +115,7 @@ Rieussec.prototype._startInterval = function() {
         return false;
     } else {
         this._state = 'running';
-        this._stopStamp = null; // If the timer is running, we can't possibly know the stop time.
+        this._pauseStamp = null; // If the timer is running, there is no pause time
         this._interval = setInterval(this._tick.bind(this), this.tickRate);
         return true;
     }

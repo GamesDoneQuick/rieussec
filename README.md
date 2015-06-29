@@ -1,9 +1,6 @@
 # Rieussec
-A Node.js lib for making stopwatch timers.
-
+A Node.js lib for making stopwatch timers. Rieussec does not have "split" functionality at this time.
 [![Build Status](https://travis-ci.org/GamesDoneQuick/rieussec.svg?branch=master)](https://travis-ci.org/GamesDoneQuick/rieussec)
-
-Rieussec does not have "split" functionality at this time.
 
 ## API Reference
 <a name="Rieussec"></a>
@@ -18,8 +15,8 @@ A rieussec stopwatch object.
     * [.tickRate](#Rieussec+tickRate) : <code>Number</code>
   * _static_
     * [.start()](#Rieussec.start)
-    * [.stop()](#Rieussec.stop)
     * [.pause()](#Rieussec.pause)
+    * [.reset()](#Rieussec.reset)
     * [.setMilliseconds()](#Rieussec.setMilliseconds)
 
 <a name="new_Rieussec_new"></a>
@@ -43,14 +40,14 @@ How often (in milliseconds) to emit "tick" events
 Start the timer.
 
 **Kind**: static method of <code>[Rieussec](#Rieussec)</code>  
-<a name="Rieussec.stop"></a>
-### Rieussec.stop()
-Stop the timer.
-
-**Kind**: static method of <code>[Rieussec](#Rieussec)</code>  
 <a name="Rieussec.pause"></a>
 ### Rieussec.pause()
 Pause the timer.
+
+**Kind**: static method of <code>[Rieussec](#Rieussec)</code>  
+<a name="Rieussec.reset"></a>
+### Rieussec.reset()
+Reset the timer.
 
 **Kind**: static method of <code>[Rieussec](#Rieussec)</code>  
 <a name="Rieussec.setMilliseconds"></a>
