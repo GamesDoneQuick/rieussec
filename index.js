@@ -29,7 +29,7 @@ var Rieussec = function(options){
     this._hrtime = [0, 0];
     this._startHrtime = process.hrtime();
     this._pauseHrtime = process.hrtime();
-    this._state = 'stopped';
+    this._setState('stopped');
     this._timer = new NanoTimer();
     this._segments = [];
 };
@@ -64,7 +64,7 @@ Rieussec.prototype.pause = function() {
             this._pauseHrtime[1] - this._startHrtime[1]
         ]);
         this._stopInterval();
-        this._state = 'paused';
+        this._setState('paused');
         this._tick();
         return true;
     } else {
@@ -82,7 +82,7 @@ Rieussec.prototype.reset = function() {
     this._milliseconds = 0;
     this._segments = [];
     this.emit('tick', 0);
-    this._state = 'stopped';
+    this._setState('stopped');
 };
 
 /**
@@ -142,7 +142,7 @@ Rieussec.prototype._startInterval = function() {
     if (this._state === 'running') {
         return false;
     } else {
-        this._state = 'running';
+        this._setState('running');
         this._pauseHrtime = null; // If the timer is running, there is no pause time
         this._timer.setInterval(this._tick.bind(this), null, this.tickRate);
         return true;
@@ -156,6 +156,11 @@ Rieussec.prototype._stopInterval = function() {
     } else {
         return false;
     }
+};
+
+Rieussec.prototype._setState = function(state) {
+    this._state = state;
+    this.emit('state', state);
 };
 
 module.exports = Rieussec;
