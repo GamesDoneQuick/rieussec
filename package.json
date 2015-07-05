@@ -31,7 +31,8 @@
   },
   "homepage": "https://github.com/GamesDoneQuick/rieussec#readme",
   "dependencies": {
-    "inherits": "^2.0.1"
+    "inherits": "^2.0.1",
+    "nanotimer": "^0.3.10"
   },
   "devDependencies": {
     "chai": "^3.0.0",

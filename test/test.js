@@ -1,7 +1,30 @@
 var Rieussec = require('../index.js');
 var should = require('chai').should();
+var NanoTimer = require('nanotimer');
+
+var ACCEPTABLE_MARGIN = 10;
 
 describe('Rieussec', function () {
+    it('should keep time correctly after a pause', function(done) {
+        var timer = new NanoTimer();
+        var rieussec = new Rieussec();
+        rieussec.start();
+        timer.setTimeout(function() {
+            rieussec.pause();
+            rieussec._milliseconds.should.be.within(100, 100 + ACCEPTABLE_MARGIN);
+
+            timer.setTimeout(function() {
+                rieussec.start();
+
+                timer.setTimeout(function() {
+                    rieussec.pause();
+                    rieussec._milliseconds.should.be.within(200, 200 + ACCEPTABLE_MARGIN);
+                    done();
+                }, null, '100m');
+            }, null, '100m');
+        }, null, '100m');
+    });
+
     describe('#reset()', function () {
         beforeEach(function (done) {
             this.rieussec = new Rieussec();
@@ -10,8 +33,9 @@ describe('Rieussec', function () {
         });
 
         it('should clear the interval', function () {
+            should.not.equal(this.rieussec._timer.intervalT1, null);
             this.rieussec.reset();
-            should.equal(this.rieussec._interval, null);
+            should.equal(this.rieussec._timer.intervalT1, null);
         });
 
         it('should set the state to "stopped"', function () {
@@ -22,6 +46,11 @@ describe('Rieussec', function () {
         it('should emit a tick', function (done) {
             this.rieussec.once('tick', function () { done(); });
             this.rieussec.reset();
+        });
+
+        it('should set #_milliseconds to 0', function () {
+            this.rieussec.reset();
+            this.rieussec._milliseconds.should.equal(0);
         });
     });
 
@@ -50,8 +79,9 @@ describe('Rieussec', function () {
 
         describe('#start()', function () {
             it('should set the interval', function () {
+                should.equal(this.rieussec._timer.intervalT1, null);
                 this.rieussec.start();
-                this.rieussec._interval.should.be.an('object');
+                should.not.equal(this.rieussec._timer.intervalT1, null);
             });
 
             it('should set the state to "running"', function () {
@@ -59,11 +89,11 @@ describe('Rieussec', function () {
                 this.rieussec._state.should.equal('running');
             });
 
-            it('should set the start stamp to the current time', function (done) {
-                var preStartStamp = this.rieussec._startStamp;
+            it('should set the start hrtime to the current time', function (done) {
+                var preStartHrtime = this.rieussec._startHrtime;
                 setTimeout(function () {
                     this.rieussec.start();
-                    this.rieussec._startStamp.should.not.equal(preStartStamp);
+                    this.rieussec._startHrtime.should.not.deep.equal(preStartHrtime);
                     done();
                 }.bind(this), 10);
             });
@@ -81,9 +111,12 @@ describe('Rieussec', function () {
                 this.rieussec._milliseconds.should.equal(100);
             });
 
-            it('should set the start stamp relative to the pause stamp', function () {
-                this.rieussec.setMilliseconds(100);
-                this.rieussec._startStamp.should.equal(this.rieussec._pauseStamp - 100);
+            it('should set the start hrtime relative to the pause hrtime', function () {
+                this.rieussec.setMilliseconds(2134);
+                this.rieussec._startHrtime.should.deep.equal([
+                    this.rieussec._pauseHrtime[0] - 2,
+                    this.rieussec._pauseHrtime[1] - 134000000
+                ]);
             });
         });
     });
@@ -114,6 +147,73 @@ describe('Rieussec', function () {
             }
         });
 
+        it('should be accurate to within 10ms for a 100ms timer', function (done) {
+            var self = this;
+            var TEST_DURATION = 100;
+            var timer = new NanoTimer();
+            self.rieussec.start();
+            timer.setTimeout(function() {
+                self.rieussec.pause();
+                self.rieussec._milliseconds.should.be.within(TEST_DURATION, TEST_DURATION + ACCEPTABLE_MARGIN);
+                self.rieussec.reset();
+                done();
+            }, null, '100m');
+        });
+
+        it('should be accurate to within 10ms for a 1s timer', function (done) {
+            var self = this;
+            var TEST_DURATION = 1000;
+            var timer = new NanoTimer();
+            self.rieussec.start();
+            timer.setTimeout(function() {
+                self.rieussec.pause();
+                self.rieussec._milliseconds.should.be.within(TEST_DURATION, TEST_DURATION + ACCEPTABLE_MARGIN);
+                self.rieussec.reset();
+                done();
+            }, null, '1s');
+        });
+
+        it('should be accurate to within 10ms for a 10s timer', function (done) {
+            this.timeout(11000);
+
+            var self = this;
+            var TEST_DURATION = 10000;
+            var timer = new NanoTimer();
+            self.rieussec.start();
+            timer.setTimeout(function() {
+                self.rieussec.pause();
+                self.rieussec._milliseconds.should.be.within(TEST_DURATION, TEST_DURATION + ACCEPTABLE_MARGIN);
+                self.rieussec.reset();
+                done();
+            }, null, '10s');
+        });
+
+        it('should keep time accurate to 10ms', function (done) {
+            this.timeout(22000);
+
+            var self = this;
+            var timer = new NanoTimer();
+            var i = 1;
+            var TEST_DURATION = 10;
+            var NUM_TESTS = 2000;
+
+            testTimer(i);
+            function testTimer(pass) {
+                self.rieussec.start();
+                timer.setTimeout(function() {
+                    self.rieussec.pause();
+                    self.rieussec._milliseconds.should.be.within(TEST_DURATION, TEST_DURATION + ACCEPTABLE_MARGIN);
+                    self.rieussec.reset();
+                    if (pass === NUM_TESTS) {
+                        timer.clearTimeout();
+                        done();
+                    }
+                }, null, TEST_DURATION + 'm', function() {
+                    if (i <= NUM_TESTS) testTimer(i++);
+                });
+            }
+        });
+
         describe('#start()', function () {
             it('should return "false"', function () {
                 this.rieussec.start().should.be.false;
@@ -121,10 +221,10 @@ describe('Rieussec', function () {
         });
 
         describe('#pause()', function () {
-            it('should set the pause stamp', function () {
-                var prePauseStamp = this.rieussec._pauseStamp;
+            it('should set the pause hrtime', function () {
+                var prePauseHrtime = this.rieussec._pauseHrtime;
                 this.rieussec.pause();
-                this.rieussec._pauseStamp.should.not.equal(prePauseStamp);
+                this.rieussec._pauseHrtime.should.not.deep.equal(prePauseHrtime);
             });
 
             it('should emit a tick', function (done) {
@@ -135,8 +235,9 @@ describe('Rieussec', function () {
             });
 
             it('should clear the interval', function () {
+                should.not.equal(this.rieussec._timer.intervalT1, null);
                 this.rieussec.pause();
-                should.equal(this.rieussec._interval, null);
+                should.equal(this.rieussec._timer.intervalT1, null);
             });
 
             it('should set the state to "paused"', function () {
@@ -151,10 +252,10 @@ describe('Rieussec', function () {
                 this.rieussec._milliseconds.should.equal(100);
             });
 
-            it('should set the start stamp relative to current time', function () {
-                var preStartStamp = this.rieussec._startStamp;
+            it('should set the start hrtime relative to current time', function () {
+                var preStartHrtime = this.rieussec._startHrtime;
                 this.rieussec.setMilliseconds(100);
-                this.rieussec._startStamp.should.not.equal(preStartStamp);
+                this.rieussec._startHrtime.should.not.deep.equal(preStartHrtime);
             });
         });
     });
@@ -190,8 +291,9 @@ describe('Rieussec', function () {
 
         describe('#start()', function () {
             it('should set the interval', function () {
+                should.equal(this.rieussec._timer.intervalT1, null);
                 this.rieussec.start();
-                this.rieussec._interval.should.be.an('object');
+                should.not.equal(this.rieussec._timer.intervalT1, null);
             });
 
             it('should set the state to "running"', function () {
@@ -199,11 +301,11 @@ describe('Rieussec', function () {
                 this.rieussec._state.should.equal('running');
             });
 
-            it('should not change the start stamp', function (done) {
-                var preStartStamp = this.rieussec._startStamp;
+            it('should set the start hrtime to the current time', function (done) {
+                var preStartHrtime = this.rieussec._startHrtime;
                 setTimeout(function () {
                     this.rieussec.start();
-                    this.rieussec._startStamp.should.equal(preStartStamp);
+                    this.rieussec._startHrtime.should.not.deep.equal(preStartHrtime);
                     done();
                 }.bind(this), 10);
             });
