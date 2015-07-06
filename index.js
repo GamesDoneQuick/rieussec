@@ -10,28 +10,23 @@ var NanoTimer = require('nanotimer');
  * @class Rieussec
  * @classdesc A rieussec stopwatch object.
  *
- * @param {Object} options - Options to initialize the component with
- * @param {Number} options.tickRate - How often (in milliseconds) to emit "tick" events, sets {@link Rieussec#tickRate}
+ * @param {Number} tickRate - How often (in milliseconds) to emit "tick" events
  */
-var Rieussec = function(options){
+var Rieussec = function(tickRate){
     events.EventEmitter.call(this);
-    options = options || {};
-
-    /**
-     * How often (in milliseconds) to emit "tick" events
-     * @name Rieussec#tickRate
-     * @type Number
-     * @default 100
-     */
-    this.tickRate = options.tickRate || '100m';
 
     // Initialize private properties
-    this._hrtime = [0, 0];
-    this._startHrtime = process.hrtime();
-    this._pauseHrtime = process.hrtime();
+    this._milliseconds = 0;
     this._setState('stopped');
     this._timer = new NanoTimer();
-    this._segments = [];
+
+    tickRate = tickRate || 100;
+    Object.defineProperty(this, 'tickRate', {
+        enumerable: true,
+        configurable: false,
+        writable: false,
+        value: tickRate
+    });
 };
 
 inherits(Rieussec, events.EventEmitter);
@@ -43,8 +38,8 @@ inherits(Rieussec, events.EventEmitter);
  */
 Rieussec.prototype.start = function() {
     if (this._state === 'stopped' || this._state === 'paused') {
+        this._tick(this._milliseconds);
         this._startInterval();
-        this._startHrtime = process.hrtime();
         return true;
     } else {
         return false;
@@ -58,14 +53,11 @@ Rieussec.prototype.start = function() {
  */
 Rieussec.prototype.pause = function() {
     if (this._state === 'running') {
-        this._pauseHrtime = process.hrtime();
-        this._segments.push([
-            this._pauseHrtime[0] - this._startHrtime[0],
-            this._pauseHrtime[1] - this._startHrtime[1]
-        ]);
         this._stopInterval();
         this._setState('paused');
-        this._tick();
+        this._milliseconds += this.hrtimeToMs(process.hrtime(this._lastTickHrtime));
+        this._lastTickHrtime = process.hrtime();
+        this._tick(this._milliseconds);
         return true;
     } else {
         return false;
@@ -80,8 +72,7 @@ Rieussec.prototype.pause = function() {
 Rieussec.prototype.reset = function() {
     this._stopInterval();
     this._milliseconds = 0;
-    this._segments = [];
-    this.emit('tick', 0);
+    this._tick(0);
     this._setState('stopped');
 };
 
@@ -91,51 +82,24 @@ Rieussec.prototype.reset = function() {
  * @method setMilliseconds
  */
 Rieussec.prototype.setMilliseconds = function(ms) {
-    var seconds = ~~(ms / 1000);
-    var nanoseconds = (ms % 1000) * 1000000;
-    this._hrtime = [seconds, nanoseconds];
     this._milliseconds = ms;
-
-    // Change the start stamp to match the new duration.
-    if (this._state === 'running') {
-        var hrtimeNow = process.hrtime();
-        this._startHrtime = [
-            hrtimeNow[0] - this._hrtime[0],
-            hrtimeNow[1] - this._hrtime[1]
-        ];
-    } else {
-        this._startHrtime = [
-            this._pauseHrtime[0] - this._hrtime[0],
-            this._pauseHrtime[1] - this._hrtime[1]
-        ];
-    }
-
-    return this._milliseconds;
+    this._tick(this._milliseconds);
 };
 
-Rieussec.prototype._tick = function() {
-    if (this._state === 'stopped') return false;
-    var nowHrtime = process.hrtime(this._startHrtime);
-    if (this._segments.length) {
-        this._hrtime = this._segments.reduce(function(prev, curr) {
-            return [
-                prev[0] + curr[0],
-                prev[1] + curr[1]
-            ]
-        });
+Rieussec.prototype.hrtimeToMs = function(hrtime) {
+    return hrtime[0] * 1000 + hrtime[1] / 1000000;
+};
 
-        if (this._state === 'running') {
-            this._hrtime = [
-                this._hrtime[0] + nowHrtime[0],
-                this._hrtime[1] + nowHrtime[1]
-            ]
-        }
+Rieussec.prototype._tick = function(ms) {
+    this._lastTickHrtime = process.hrtime();
+    if (typeof (ms) !== 'undefined') {
+        this.emit('tick', ms);
     } else {
-        this._hrtime = nowHrtime;
+        if (this._state === 'stopped') return;
+        this._milliseconds += this.tickRate;
+        this.emit('tick', this._milliseconds);
     }
-    this._milliseconds = Math.round(this._hrtime[0] * 1000 + this._hrtime[1] / 1000000);
-    this.emit('tick', this._milliseconds);
-    return true;
+
 };
 
 Rieussec.prototype._startInterval = function() {
@@ -143,8 +107,7 @@ Rieussec.prototype._startInterval = function() {
         return false;
     } else {
         this._setState('running');
-        this._pauseHrtime = null; // If the timer is running, there is no pause time
-        this._timer.setInterval(this._tick.bind(this), null, this.tickRate);
+        this._timer.setInterval(this._tick.bind(this), null, this.tickRate + 'm');
         return true;
     }
 };

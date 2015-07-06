@@ -2,7 +2,7 @@ var Rieussec = require('../index.js');
 var should = require('chai').should();
 var NanoTimer = require('nanotimer');
 
-var ACCEPTABLE_MARGIN = 10;
+var ACCEPTABLE_MARGIN = 5;
 
 describe('Rieussec', function () {
     it('should keep time correctly after a pause', function(done) {
@@ -88,15 +88,6 @@ describe('Rieussec', function () {
                 this.rieussec.start();
                 this.rieussec._state.should.equal('running');
             });
-
-            it('should set the start hrtime to the current time', function (done) {
-                var preStartHrtime = this.rieussec._startHrtime;
-                setTimeout(function () {
-                    this.rieussec.start();
-                    this.rieussec._startHrtime.should.not.deep.equal(preStartHrtime);
-                    done();
-                }.bind(this), 10);
-            });
         });
 
         describe('#pause()', function () {
@@ -109,14 +100,6 @@ describe('Rieussec', function () {
             it('should set the milliseconds', function () {
                 this.rieussec.setMilliseconds(100);
                 this.rieussec._milliseconds.should.equal(100);
-            });
-
-            it('should set the start hrtime relative to the pause hrtime', function () {
-                this.rieussec.setMilliseconds(2134);
-                this.rieussec._startHrtime.should.deep.equal([
-                    this.rieussec._pauseHrtime[0] - 2,
-                    this.rieussec._pauseHrtime[1] - 134000000
-                ]);
             });
         });
     });
@@ -147,7 +130,7 @@ describe('Rieussec', function () {
             }
         });
 
-        it('should be accurate to within 10ms for a 100ms timer', function (done) {
+        it('should be accurate to within 5ms for a 100ms timer', function (done) {
             var self = this;
             var TEST_DURATION = 100;
             var timer = new NanoTimer();
@@ -160,7 +143,7 @@ describe('Rieussec', function () {
             }, null, '100m');
         });
 
-        it('should be accurate to within 10ms for a 1s timer', function (done) {
+        it('should be accurate to within 5ms for a 1s timer', function (done) {
             var self = this;
             var TEST_DURATION = 1000;
             var timer = new NanoTimer();
@@ -173,7 +156,7 @@ describe('Rieussec', function () {
             }, null, '1s');
         });
 
-        it('should be accurate to within 10ms for a 10s timer', function (done) {
+        it('should be accurate to within 5ms for a 10s timer', function (done) {
             this.timeout(11000);
 
             var self = this;
@@ -188,7 +171,7 @@ describe('Rieussec', function () {
             }, null, '10s');
         });
 
-        it('should keep time accurate to 10ms', function (done) {
+        it('should keep time accurate to 5ms', function (done) {
             this.timeout(22000);
 
             var self = this;
@@ -221,12 +204,6 @@ describe('Rieussec', function () {
         });
 
         describe('#pause()', function () {
-            it('should set the pause hrtime', function () {
-                var prePauseHrtime = this.rieussec._pauseHrtime;
-                this.rieussec.pause();
-                this.rieussec._pauseHrtime.should.not.deep.equal(prePauseHrtime);
-            });
-
             it('should emit a tick', function (done) {
                 this.rieussec.once('tick', function () {
                     done();
@@ -250,12 +227,6 @@ describe('Rieussec', function () {
             it('should set the milliseconds', function () {
                 this.rieussec.setMilliseconds(100);
                 this.rieussec._milliseconds.should.equal(100);
-            });
-
-            it('should set the start hrtime relative to current time', function () {
-                var preStartHrtime = this.rieussec._startHrtime;
-                this.rieussec.setMilliseconds(100);
-                this.rieussec._startHrtime.should.not.deep.equal(preStartHrtime);
             });
         });
     });
@@ -299,15 +270,6 @@ describe('Rieussec', function () {
             it('should set the state to "running"', function () {
                 this.rieussec.start();
                 this.rieussec._state.should.equal('running');
-            });
-
-            it('should set the start hrtime to the current time', function (done) {
-                var preStartHrtime = this.rieussec._startHrtime;
-                setTimeout(function () {
-                    this.rieussec.start();
-                    this.rieussec._startHrtime.should.not.deep.equal(preStartHrtime);
-                    done();
-                }.bind(this), 10);
             });
         });
 
