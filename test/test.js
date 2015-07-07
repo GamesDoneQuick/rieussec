@@ -228,6 +228,19 @@ describe('Rieussec', function () {
                 this.rieussec.setMilliseconds(100);
                 this.rieussec._milliseconds.should.equal(100);
             });
+
+            context('when "keepCycle" is "true"', function () {
+                it('should retain the decimal place of the previous millisecond value', function (done) {
+                    var self = this;
+                    setTimeout(function() {
+                        self.rieussec.pause();
+                        var pauseDecimal = self.rieussec._milliseconds % 1;
+                        self.rieussec.setMilliseconds(100, true);
+                        self.rieussec._milliseconds.should.equal(100 + pauseDecimal);
+                        done();
+                    }, 51);
+                });
+            });
         });
     });
 
