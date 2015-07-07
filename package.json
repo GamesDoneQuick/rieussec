@@ -1,6 +1,6 @@
 {
   "name": "rieussec",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A Node.js lib for making stopwatches and split timers.",
   "main": "index.js",
   "scripts": {
