@@ -230,15 +230,15 @@ describe('Rieussec', function () {
             });
 
             context('when "keepCycle" is "true"', function () {
-                it('should retain the decimal place of the previous millisecond value', function (done) {
+                it('should retain the seconds cycle', function (done) {
                     var self = this;
                     setTimeout(function() {
                         self.rieussec.pause();
-                        var pauseDecimal = self.rieussec._milliseconds % 1;
-                        self.rieussec.setMilliseconds(100, true);
-                        self.rieussec._milliseconds.should.equal(100 + pauseDecimal);
+                        var pauseModThou = self.rieussec._milliseconds % 1000;
+                        self.rieussec.setMilliseconds(1000, true);
+                        self.rieussec._milliseconds.should.equal(1000 + pauseModThou);
                         done();
-                    }, 51);
+                    }, 1051);
                 });
             });
         });
