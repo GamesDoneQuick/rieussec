@@ -86,7 +86,12 @@ Rieussec.prototype.reset = function() {
 Rieussec.prototype.setMilliseconds = function(ms, keepCycle) {
     // Retains the decimal portion of the previous number, which keeps the tick cycle consistent
     if (keepCycle) {
-        this._milliseconds = Math.floor(ms) + this._milliseconds % 1;
+        if (this._state !== 'paused') {
+            this._milliseconds = this.hrtimeToMs(process.hrtime(this._lastTickHrtime));
+        }
+
+        var modThousands = this._milliseconds % 1000;
+        this._milliseconds = ms - (ms % 1000) + modThousands;
     } else {
         this._milliseconds = ms;
         this._tick(this._milliseconds);
