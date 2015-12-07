@@ -2,7 +2,7 @@ var Rieussec = require('../index.js');
 var should = require('chai').should();
 var NanoTimer = require('nanotimer');
 
-var ACCEPTABLE_MARGIN = 16;
+var ACCEPTABLE_MARGIN = 32;
 
 describe('Rieussec', function () {
     it('should keep time correctly after a pause', function(done) {
@@ -130,7 +130,7 @@ describe('Rieussec', function () {
             }
         });
 
-        it('should be accurate to within 16ms for a 100ms timer', function (done) {
+        it('should be accurate to within 32ms for a 100ms timer', function (done) {
             var self = this;
             var TEST_DURATION = 100;
             var timer = new NanoTimer();
@@ -143,7 +143,7 @@ describe('Rieussec', function () {
             }, null, '100m');
         });
 
-        it('should be accurate to within 16ms for a 1s timer', function (done) {
+        it('should be accurate to within 32ms for a 1s timer', function (done) {
             var self = this;
             var TEST_DURATION = 1000;
             var timer = new NanoTimer();
@@ -156,7 +156,7 @@ describe('Rieussec', function () {
             }, null, '1s');
         });
 
-        it('should be accurate to within 16ms for a 10s timer', function (done) {
+        it('should be accurate to within 32ms for a 10s timer', function (done) {
             this.timeout(11000);
 
             var self = this;
@@ -171,7 +171,7 @@ describe('Rieussec', function () {
             }, null, '10s');
         });
 
-        it('should keep time accurate to 16ms', function (done) {
+        it('should keep time accurate to 32ms', function (done) {
             this.timeout(22000);
 
             var self = this;
