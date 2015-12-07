@@ -10,7 +10,7 @@ var NanoTimer = require('nanotimer');
  * @class Rieussec
  * @classdesc A rieussec stopwatch object.
  *
- * @param {Number} tickRate - How often (in milliseconds) to emit "tick" events
+ * @param {Number} [tickRate=100] - How often (in milliseconds) to emit "tick" events
  */
 var Rieussec = function(tickRate){
     events.EventEmitter.call(this);
