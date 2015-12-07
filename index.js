@@ -94,12 +94,13 @@ Rieussec.prototype.setMilliseconds = function(ms, keepCycle) {
         this._milliseconds = ms - (ms % 1000) + modThousands;
     } else {
         this._milliseconds = ms;
-        this._tick(this._milliseconds);
     }
+
+    this._tick(this._milliseconds);
 };
 
 Rieussec.prototype.hrtimeToMs = function(hrtime) {
-    return hrtime[0] * 1000 + hrtime[1] / 1000000;
+    return Math.floor(hrtime[0] * 1000 + hrtime[1] / 1000000);
 };
 
 Rieussec.prototype._tick = function(ms) {
@@ -111,7 +112,6 @@ Rieussec.prototype._tick = function(ms) {
         this._milliseconds += this.tickRate;
         this.emit('tick', this._milliseconds);
     }
-
 };
 
 Rieussec.prototype._startInterval = function() {
