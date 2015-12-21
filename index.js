@@ -81,7 +81,8 @@ Rieussec.prototype.reset = function() {
  * @memberof Rieussec
  * @method setMilliseconds
  * @param {Number} ms - The new duration of the timer
- * @param {Boolean} [keepCycle=false] - If true, retains the decimal value from the previous tick, keeping the cycle consistent.
+ * @param {Boolean} [keepCycle=false] - If true, retains the hundreds, tens, and ones places from the previous tick,
+ * keeping the seconds cycle consistent.
  */
 Rieussec.prototype.setMilliseconds = function(ms, keepCycle) {
     // Retains the decimal portion of the previous number, which keeps the tick cycle consistent

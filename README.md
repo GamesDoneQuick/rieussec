@@ -50,6 +50,6 @@ Manually set the timer (in milliseconds).
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | ms | <code>Number</code> |  | The new duration of the timer |
-| [keepCycle] | <code>Boolean</code> | <code>false</code> | If true, retains the decimal value from the previous tick, keeping the cycle consistent. |
+| [keepCycle] | <code>Boolean</code> | <code>false</code> | If true, retains the hundreds, tens, and ones places from the previous tick, keeping the seconds cycle consistent. |
 
 
