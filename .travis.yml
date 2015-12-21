@@ -1,9 +1,15 @@
 language: node_js
-node_js:
-  - "0.12"
-  - "iojs"
 
-notifications:
-  email:
-    on_success: never
-    on_failure: always
+node_js:
+  - '4'
+  - 'stable'
+
+os:
+  - linux
+
+sudo: false
+
+after_success: npm run coveralls
+
+matrix:
+  fast_finish: true
