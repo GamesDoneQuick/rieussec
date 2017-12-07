@@ -3,6 +3,9 @@ A Node.js lib for making stopwatch timers. Rieussec does not have "split" functi
 [![Build Status](https://travis-ci.org/GamesDoneQuick/rieussec.svg?branch=master)](https://travis-ci.org/GamesDoneQuick/rieussec)
 [![Coverage Status](https://coveralls.io/repos/GamesDoneQuick/rieussec/badge.svg?branch=master&service=github)](https://coveralls.io/github/GamesDoneQuick/rieussec?branch=master)
 
+## DEPRECATION NOTICE
+This library is deprecated. It will not be updated, and we advise against using it. GDQ has not used it for several years. We currently use a mix of [`livesplit-core`](https://github.com/CryZe/livesplit-core) and some simple timestamp-based code.
+
 ## API Reference
 <a name="Rieussec"></a>
 ## Rieussec
